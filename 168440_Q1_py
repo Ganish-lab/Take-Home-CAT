@@ -1,0 +1,159 @@
+class Book:
+    def __init__(self, title, author):
+        self.title = title
+        self.author = author
+        self.is_borrowed = False
+
+    def borrow(self):
+        if not self.is_borrowed:
+            self.is_borrowed = True
+            return True
+        return False
+
+    def return_book(self):
+        if self.is_borrowed:
+            self.is_borrowed = False
+            return True
+        return False
+
+
+class LibraryMember:
+    def __init__(self, name, member_id):
+        self.name = name
+        self.member_id = member_id
+        self.borrowed_books = []
+
+    def borrow_book(self, book):
+        if book.borrow():
+            self.borrowed_books.append(book)
+            print(f"{self.name} has borrowed '{book.title}' by {book.author}.")
+        else:
+            print(f"'{book.title}' is currently unavailable.")
+
+    def return_book(self, book):
+        if book in self.borrowed_books:
+            book.return_book()
+            self.borrowed_books.remove(book)
+            print(f"{self.name} has returned '{book.title}'.")
+        else:
+            print(f"{self.name} did not borrow '{book.title}'.")
+
+    def list_borrowed_books(self):
+        if self.borrowed_books:
+            print(f"{self.name} has borrowed the following books:")
+            for book in self.borrowed_books:
+                print(f" - {book.title} by {book.author}")
+        else:
+            print(f"{self.name} has not borrowed any books.")
+
+
+class Library:
+    def __init__(self):
+        self.books = []
+        self.members = []
+
+    def add_book(self, title, author):
+        new_book = Book(title, author)
+        self.books.append(new_book)
+        print(f"Book '{title}' by {author} added to the library.")
+
+    def add_member(self, name):
+        member_id = len(self.members) + 1
+        new_member = LibraryMember(name, member_id)
+        self.members.append(new_member)
+        print(f"Library member '{name}' added with Member ID {member_id}.")
+
+    def find_book(self, title):
+        return next((book for book in self.books if book.title == title), None)
+
+    def find_member(self, name):
+        return next((member for member in self.members if member.name == name), None)
+
+    def list_all_books(self):
+        if self.books:
+            print("Available books in the library:")
+            for book in self.books:
+                status = "Available" if not book.is_borrowed else "Borrowed"
+                print(f" - {book.title} by {book.author} [{status}]")
+        else:
+            print("No books available in the library.")
+
+
+# Interactive menu
+def library_menu():
+    library = Library()
+    library.add_book("Introduction to API","Peter Obwogo")
+    library.add_book("The Great City","Shay Namidi")
+    library.add_book("Principles of Marketing","Philip Kotler")
+
+    library.add_member("Robin")
+    library.add_member("Ganira")
+
+    while True:
+        print("\nLibrary Management System")
+        print("1. Borrow a book")
+        print("2. Return a book")
+        print("3. List borrowed books")
+        print("4. Add a new book")
+        print("5. Register a new member")
+        print("6. List all books")
+        print("7. Exit")
+        
+        choice = input("Enter your choice: ")
+        
+        if choice == '1':
+            member_name = input("Enter member's name: ")
+            book_title = input("Enter the title of the book: ")
+            member = library.find_member(member_name)
+            book = library.find_book(book_title)
+
+            if member and book:
+                member.borrow_book(book)
+            elif not member:
+                print("Member not found.")
+            elif not book:
+                print("Book not found.")
+                
+        elif choice == '2':
+            member_name = input("Enter member's name: ")
+            book_title = input("Enter the title of the book: ")
+            member = library.find_member(member_name)
+
+            if member:
+                book = next((b for b in member.borrowed_books if b.title == book_title), None)
+                if book:
+                    member.return_book(book)
+                else:
+                    print("Book not borrowed by this member.")
+            else:
+                print("Member not found.")
+                
+        elif choice == '3':
+            member_name = input("Enter member's name: ")
+            member = library.find_member(member_name)
+
+            if member:
+                member.list_borrowed_books()
+            else:
+                print("Member not found.")
+        
+        elif choice == '4':
+            title = input("Enter the title of the book: ")
+            author = input("Enter the author's name: ")
+            library.add_book(title, author)
+        
+        elif choice == '5':
+            name = input("Enter the member's name: ")
+            library.add_member(name)
+        
+        elif choice == '6':
+            library.list_all_books()
+        
+        elif choice == '7':
+            print("Exiting the system. Goodbye")
+            break
+        else:
+            print("Invalid choice. Please try again.")
+
+# Run the library menu
+library_menu()
